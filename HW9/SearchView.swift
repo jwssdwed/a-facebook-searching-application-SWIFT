@@ -1,0 +1,220 @@
+//
+//  SearchView.swift
+//  HW9
+//
+//  Created by Chengyu_Ovaltine on 4/12/17.
+//  Copyright © 2017 Chengyu_Ovaltine. All rights reserved.
+//
+
+import UIKit
+import Alamofire
+import SwiftyJSON
+import SwiftSpinner
+import CoreData
+
+class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    @IBOutlet weak var previousButton: UIButton!
+    @IBOutlet weak var nextButton: UIButton!
+    
+    @IBOutlet weak var searchShow: UITableView!
+    @IBAction func previous(_ sender: Any) {
+        Alamofire.request(self.previousPage).responseJSON { response in
+            if let resultValue = response.result.value {
+                self.json = JSON(resultValue)
+                self.searchShow.reloadData()
+                self.jsonReload()
+            }
+        }
+        
+    }
+    
+    func jsonReload() {
+        //judge whether we are supposed to enable previous button
+        if let prePage = self.json["paging"]["previous"].rawString() {
+            if (prePage != "null") {
+                self.previousPage = prePage;
+                self.previousButton.isEnabled = true;
+            }
+            else{
+                self.previousButton.isEnabled = false;
+            }
+        }
+        else{
+            self.previousButton.isEnabled = false;
+        }
+        //judge whether we are supposed to enable next button
+        if let nexPage = self.json["paging"]["next"].rawString() {
+            if (nexPage != "null") {
+                self.nextPage = nexPage;
+                self.nextButton.isEnabled = true
+            }
+            else{
+                self.nextButton.isEnabled = false;
+            }
+        }
+        else{
+            self.nextButton.isEnabled = false;
+        }
+    }
+    @IBOutlet weak var open: UIBarButtonItem!
+    @IBAction func open(_ sender: Any) {
+        print("you press the menu button")
+    }
+    
+    @IBAction func next(_ sender: Any) {
+        Alamofire.request(self.nextPage).responseJSON { response in
+            
+            if let resultValue = response.result.value {
+                self.json = JSON(resultValue)
+                self.searchShow.reloadData()
+                self.jsonReload()
+            }
+        }
+        
+    }
+    @available(iOS 2.0, *)
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
+        if json["data"].count == 0{
+            SwiftSpinner.hide()
+        }
+        return json["data"].count;
+    }
+    
+    
+    // Row display. Implementers should *always* try to reuse cells by setting each cell's reuseIdentifier and querying for available reusable cells with dequeueReusableCellWithIdentifier:
+    // Cell gets various attributes set automatically based on table (separators) and data source (accessory views, editing controls)
+    
+    @available(iOS 2.0, *)
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
+        let cell:FbItems = tableView.dequeueReusableCell(withIdentifier: "searchResult", for: indexPath)as! FbItems;
+        if let url = NSURL(string: json["data"][indexPath.row]["picture"]["data"]["url"].rawString()!){
+            if let data = NSData(contentsOf: url as URL){
+                cell.profile.image=UIImage(data: data as Data)
+            }
+        }
+        cell.name.text = json["data"][indexPath.row]["name"].rawString();
+        cell.favoriteButton.id = json["data"][indexPath.row]["id"].rawString()!
+        cell.favoriteButton.url = json["data"][indexPath.row]["picture"]["data"]["url"].rawString()!
+        cell.favoriteButton.name = json["data"][indexPath.row]["name"].rawString()!
+        cell.favoriteButton.type = "user";
+        cell.favoriteButton.addTarget(self, action: #selector(SearchView.like(sender:)), for: .touchUpInside)
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
+        let global = appDelegate.persistentContainer.viewContext
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
+        request.returnsObjectsAsFaults = false;
+        do{
+            let results = try global.fetch(request)
+            if results.count > 0 {
+                for result in results as! [NSManagedObject]{
+                    if let tempId = result.value(forKey: "id") as? String{
+                        if tempId == cell.favoriteButton.id{
+                            if let image = UIImage(named: "filled.png"){
+                                cell.favoriteButton.setImage(image, for: .normal)
+                                return cell;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch{
+            print("fails to fetch all favorited information")
+        }
+        cell.favoriteButton.setImage(UIImage(named:"empty.png"), for: .normal)
+        
+        return cell;
+    }
+    
+    func like(sender: FavoriteButton){
+        //get global object
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        let nameListObj = UserDefaults.standard.object(forKey: "favoriteName")
+        let urlListObj = UserDefaults.standard.object(forKey: "favoriteUrl")
+        let typeListObj = UserDefaults.standard.object(forKey: "favoriteType")
+        if var idList = idListObj as? Array<String>{
+            var i = 0
+            while i<idList.count{
+                if idList[i] == sender.id{
+                    if let image = UIImage(named: "empty.png"){
+                        sender.setImage(image, for: .normal)
+                    }
+                    idList.remove(at: i)
+                    if var nameList = nameListObj as? Array<String>{
+                        nameList.remove(at: i)
+                    }
+                    if var urlList = urlListObj as? Array<String>{
+                        urlList.remove(at: i)
+                    }
+                    if var typeList = typeListObj as? Array<String>{
+                        typeList.remove(at: i)
+                    }
+                    return
+                }
+                i+=1
+            }
+        }
+        
+        
+        
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        MyGlobal.id = json["data"][indexPath.row]["id"].rawString()!
+        MyGlobal.profileUrl = json["data"][indexPath.row]["picture"]["data"]["url"].rawString()!
+        MyGlobal.passedName = json["data"][indexPath.row]["name"].rawString()!
+        MyGlobal.type = "user"
+    }
+
+    var stringPassed = "abc"
+    var json = JSON("abc")
+    var previousPage = "null"
+    var nextPage = "null"
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        SwiftSpinner.show(duration:1.5, title:"Loading data...")
+        if self.revealViewController() != nil {
+            open.target = self.revealViewController()
+            open.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(revealViewController().panGestureRecognizer())
+        }
+        //get global object
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
+        let global = appDelegate.persistentContainer.viewContext
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Query")
+        request.returnsObjectsAsFaults = false;
+        do{
+            let result = try global.fetch(request)
+            if result.count>0{
+                if let myStr = (result[result.count-1] as! NSManagedObject).value(forKey: "keyword") as? String{
+                    self.stringPassed = myStr;
+                }
+            }
+            
+        }catch{
+            print("fetch result failing")
+        }
+        print("keyword = " + self.stringPassed)
+        //send request to AWS and get JSON file
+        Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=user!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAPunL5N6OI0irmVe5ek5SeRyXVFdrA9l5wBIOpnxgEnrA2IprU6YshZC4d4EQ9XnpfLCXcHdPC3rk3kZC5qT0p0caZC0FdXsviOPRS0JzYDagSIkP7EOwCCGuZCrs6SHJNYOR1eYHNQkUze1iagZD&isDetail=0").responseJSON { response in
+            
+            if let resultValue = response.result.value {
+                self.json = JSON(resultValue)
+                self.searchShow.reloadData()
+            }
+            
+            self.jsonReload();
+        }
+        // Do any additional setup after loading the view.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        self.searchShow.reloadData()
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+}

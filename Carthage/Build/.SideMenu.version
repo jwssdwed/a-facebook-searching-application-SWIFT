@@ -1,0 +1,19 @@
+{
+  "commitish" : "e6eb28385c6ef931db191c7142d8cd5bbec46c87",
+  "iOS" : [
+    {
+      "hash" : "985e4fce931e137a877f5ee635eff4ace4e18d51542bdd5fec367a7f4d007023",
+      "name" : "SideMenu"
+    }
+  ],
+  "xcodeVersion" : "Xcode 8.2.1\nBuild version 8C1002",
+  "watchOS" : [
+
+  ],
+  "tvOS" : [
+
+  ],
+  "Mac" : [
+
+  ]
+}
