@@ -72,9 +72,6 @@ class GroupView: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @available(iOS 2.0, *)
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
-        if json["data"].count == 0{
-            SwiftSpinner.hide()
-        }
         return json["data"].count;
     }
     
@@ -99,27 +96,14 @@ class GroupView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         cell.groupFavoriteButton.addTarget(self, action: #selector(SearchView.like(sender:)), for: .touchUpInside)
         
         //check whether the item is favorited or not
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
-        request.returnsObjectsAsFaults = false;
-        do{
-            let results = try global.fetch(request)
-            if results.count > 0 {
-                for result in results as! [NSManagedObject]{
-                    if let tempId = result.value(forKey: "id") as? String{
-                        if tempId == cell.groupFavoriteButton.id{
-                            if let image = UIImage(named: "filled.png"){
-                                cell.groupFavoriteButton.setImage(image, for: .normal)
-                                return cell;
-                            }
-                        }
-                    }
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        if let idList = idListObj as? Array<String>{
+            for id in idList {
+                if id == cell.groupFavoriteButton.id{
+                    cell.groupFavoriteButton.setImage(UIImage(named:"filled.png"), for: .normal)
+                    return cell
                 }
             }
-        }
-        catch{
-            print("fails to fetch all favorited information")
         }
         cell.groupFavoriteButton.setImage(UIImage(named:"empty.png"), for: .normal)
         
@@ -128,57 +112,75 @@ class GroupView: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     func like(sender: FavoriteButton){
         //get global object
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
-        request.returnsObjectsAsFaults = false;
-        do{
-            let results = try global.fetch(request)
-            if results.count>0{
-                for result in results as! [NSManagedObject]{
-                    if let tempId = result.value(forKey: "id") as? String{
-                        if tempId == sender.id{
-                            if let image = UIImage(named: "empty.png"){
-                                sender.setImage(image, for: .normal)
-                            }
-                            global.delete(result)
-                            print("favorite removed")
-                            return
-                        }
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        let nameListObj = UserDefaults.standard.object(forKey: "favoriteName")
+        let urlListObj = UserDefaults.standard.object(forKey: "favoriteUrl")
+        let typeListObj = UserDefaults.standard.object(forKey: "favoriteType")
+        if var idList = idListObj as? Array<String>{
+            var i = 0
+            while i<idList.count{
+                if idList[i] == sender.id{
+                    if let image = UIImage(named: "empty.png"){
+                        sender.setImage(image, for: .normal)
                     }
+                    idList.remove(at: i)
+                    if var nameList = nameListObj as? Array<String>{
+                        nameList.remove(at: i)
+                        UserDefaults.standard.set(nameList, forKey: "favoriteName")
+                    }
+                    if var urlList = urlListObj as? Array<String>{
+                        urlList.remove(at: i)
+                        UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+                    }
+                    if var typeList = typeListObj as? Array<String>{
+                        typeList.remove(at: i)
+                        UserDefaults.standard.set(typeList, forKey: "favoriteType")
+                    }
+                    UserDefaults.standard.set(idList, forKey: "favoriteId")
+                    return
                 }
+                i+=1
             }
-            let newFavorite = NSEntityDescription.insertNewObject(forEntityName: "Favorite", into: global)
-            newFavorite.setValue(sender.id, forKey: "id")
-            newFavorite.setValue(sender.url, forKey: "url")
-            newFavorite.setValue(sender.name, forKey: "name")
-            newFavorite.setValue(sender.type, forKey: "type")
-            
-            do{
-                try global.save();
-                print("favorite saved")
-                if let image = UIImage(named: "filled.png"){
-                    sender.setImage(image, for: .normal)
-                }
-            } catch{
-                print("fails to save favorite")
-            }
-        }catch{
-            print("fetch favorite result failing")
         }
         
-        do{
-            let results = try global.fetch(request)
-            if results.count>0{
-                for result in results as! [NSManagedObject]{
-                    if let temp = result.value(forKey: "name") as? String{
-                        print("user name = " + temp)
-                    }
-                }
-            }
+        if var idList = idListObj as? Array<String>{
+            idList.append(sender.id!)
+            UserDefaults.standard.set(idList, forKey: "favoriteId")
         }
-        catch{
-            print("show all favorite result fails")
+        else{
+            let idList = [sender.id!]
+            UserDefaults.standard.set(idList, forKey: "favoriteId")
+        }
+        
+        if var nameList = nameListObj as? Array<String>{
+            nameList.append(sender.name!)
+            UserDefaults.standard.set(nameList, forKey: "favoriteName")
+        }
+        else{
+            let nameList = [sender.name!]
+            UserDefaults.standard.set(nameList, forKey: "favoriteName")
+        }
+        
+        if var urlList = urlListObj as? Array<String>{
+            urlList.append(sender.url!)
+            UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+        }
+        else{
+            let urlList = [sender.url!]
+            UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+        }
+        
+        if var typeList = typeListObj as? Array<String>{
+            typeList.append(sender.type)
+            UserDefaults.standard.set(typeList, forKey: "favoriteType")
+        }
+        else{
+            let typeList = [sender.type]
+            UserDefaults.standard.set(typeList, forKey: "favoriteType")
+        }
+        
+        if let image = UIImage(named: "filled.png"){
+            sender.setImage(image, for: .normal)
         }
         
     }

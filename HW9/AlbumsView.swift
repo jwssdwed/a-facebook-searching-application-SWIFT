@@ -10,7 +10,7 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 import SwiftSpinner
-import CoreData
+import EasyToast
 
 class AlbumsView: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var selectedIndex: IndexPath?
@@ -20,6 +20,7 @@ class AlbumsView: UIViewController, UITableViewDataSource, UITableViewDelegate {
     @IBAction func back(_ sender: Any) {
         if let nav = self.navigationController {
             nav.popViewController(animated: true)
+            SwiftSpinner.show(duration:1.5, title:"Loading data...")
         } else {
             self.dismiss(animated: true, completion: nil)
             SwiftSpinner.show(duration:1.5, title:"Loading data...")
@@ -42,51 +43,93 @@ class AlbumsView: UIViewController, UITableViewDataSource, UITableViewDelegate {
             shareDialog.delegate = nil
             shareDialog.fromViewController = self
             shareDialog.show()
-            
+//            shareDialog.
+//            self.view.showToast("Shared!", position: .bottom, popTime: kToastNoPopTime, dismissOnTap: true)
         }
         
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
-        request.returnsObjectsAsFaults = false;
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        let nameListObj = UserDefaults.standard.object(forKey: "favoriteName")
+        let urlListObj = UserDefaults.standard.object(forKey: "favoriteUrl")
+        let typeListObj = UserDefaults.standard.object(forKey: "favoriteType")
+
         var exist:Bool = false
-        var betoRemoved:NSManagedObject?
         
-        do{
-            let results = try global.fetch(request)
-            if results.count > 0 {
-                for result in results as! [NSManagedObject]{
-                    if let tempId = result.value(forKey: "id") as? String{
-                        if tempId == MyGlobal.id{
-                            betoRemoved=result
-                            exist = true;
-                            break;
-                        }
-                    }
+        if var idList = idListObj as? Array<String>{
+            var i = 0
+            while i<idList.count{
+                if idList[i] == MyGlobal.id{
+                    exist = true
+                    break
                 }
+                i+=1
             }
-        }
-        catch{
-            print("loops favorites fails")
         }
         
         let favoriteAction = UIAlertAction(title: "Add to favorites", style:.default){action in
-            let newFavorite = NSEntityDescription.insertNewObject(forEntityName: "Favorite", into: global)
-            newFavorite.setValue(MyGlobal.id, forKey: "id")
-            newFavorite.setValue(MyGlobal.profileUrl, forKey: "url")
-            newFavorite.setValue(MyGlobal.passedName, forKey: "name")
-            newFavorite.setValue(MyGlobal.type, forKey: "type")
-            do{
-                try global.save();
-                print("one favorite saved")
-            } catch{
-                print("fails to save favorite")
+            if var idList = idListObj as? Array<String>{
+                idList.append(MyGlobal.id)
+                UserDefaults.standard.set(idList, forKey: "favoriteId")
             }
+            else{
+                let idList = [MyGlobal.id]
+                UserDefaults.standard.set(idList, forKey: "favoriteId")
+            }
+            
+            if var nameList = nameListObj as? Array<String>{
+                nameList.append(MyGlobal.passedName)
+                UserDefaults.standard.set(nameList, forKey: "favoriteName")
+            }
+            else{
+                let nameList = [MyGlobal.passedName]
+                UserDefaults.standard.set(nameList, forKey: "favoriteName")
+            }
+            
+            if var urlList = urlListObj as? Array<String>{
+                urlList.append(MyGlobal.profileUrl)
+                UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+            }
+            else{
+                let urlList = [MyGlobal.profileUrl]
+                UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+            }
+            
+            if var typeList = typeListObj as? Array<String>{
+                typeList.append(MyGlobal.type)
+                UserDefaults.standard.set(typeList, forKey: "favoriteType")
+            }
+            else{
+                let typeList = [MyGlobal.type]
+                UserDefaults.standard.set(typeList, forKey: "favoriteType")
+            }
+            self.view.showToast("Add to favorites!", position: .bottom, popTime: kToastNoPopTime, dismissOnTap: true)
         }
         let removeFavoriteAction = UIAlertAction(title: "Remove from favorites", style: .default){ action in
-            global.delete(betoRemoved!)
-            print("remove a favorite successfully" )
+            if var idList = idListObj as? Array<String>{
+                var i = 0
+                while i<idList.count{
+                    if idList[i] == MyGlobal.id{
+                        idList.remove(at: i)
+                        if var nameList = nameListObj as? Array<String>{
+                            nameList.remove(at: i)
+                            UserDefaults.standard.set(nameList, forKey: "favoriteName")
+                        }
+                        if var urlList = urlListObj as? Array<String>{
+                            urlList.remove(at: i)
+                            UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+                        }
+                        if var typeList = typeListObj as? Array<String>{
+                            typeList.remove(at: i)
+                            UserDefaults.standard.set(typeList, forKey: "favoriteType")
+                        }
+                        UserDefaults.standard.set(idList, forKey: "favoriteId")
+                        break;
+                    }
+                    i+=1
+                }
+            }
+            self.view.showToast("Remove from favorites!", position: .bottom, popTime: kToastNoPopTime, dismissOnTap: true)
         }
+        
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive){ action in
             print("Cancel")
         }

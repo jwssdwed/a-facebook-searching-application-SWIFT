@@ -9,10 +9,13 @@
 import UIKit
 import Alamofire
 import SwiftyJSON
-import SwiftSpinner
 import CoreData
+import SwiftSpinner
+import CoreLocation
+import MapKit
 
-class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate {
+    var locationManager = CLLocationManager()
     
     @IBOutlet weak var previousButton: UIButton!
     @IBOutlet weak var nextButton: UIButton!
@@ -73,9 +76,6 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @available(iOS 2.0, *)
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
-        if json["data"].count == 0{
-            SwiftSpinner.hide()
-        }
 //        print(json["data"].count)
         return json["data"].count;
     }
@@ -101,27 +101,14 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         cell.placeFavoriteButton.addTarget(self, action: #selector(SearchView.like(sender:)), for: .touchUpInside)
         
         //check whether the item is favorited or not
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
-        request.returnsObjectsAsFaults = false;
-        do{
-            let results = try global.fetch(request)
-            if results.count > 0 {
-                for result in results as! [NSManagedObject]{
-                    if let tempId = result.value(forKey: "id") as? String{
-                        if tempId == cell.placeFavoriteButton.id{
-                            if let image = UIImage(named: "filled.png"){
-                                cell.placeFavoriteButton.setImage(image, for: .normal)
-                                return cell;
-                            }
-                        }
-                    }
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        if let idList = idListObj as? Array<String>{
+            for id in idList {
+                if id == cell.placeFavoriteButton.id{
+                    cell.placeFavoriteButton.setImage(UIImage(named:"filled.png"), for: .normal)
+                    return cell
                 }
             }
-        }
-        catch{
-            print("fails to fetch all favorited information")
         }
         cell.placeFavoriteButton.setImage(UIImage(named:"empty.png"), for: .normal)
         
@@ -130,57 +117,75 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     func like(sender: FavoriteButton){
         //get global object
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
-        request.returnsObjectsAsFaults = false;
-        do{
-            let results = try global.fetch(request)
-            if results.count>0{
-                for result in results as! [NSManagedObject]{
-                    if let tempId = result.value(forKey: "id") as? String{
-                        if tempId == sender.id{
-                            if let image = UIImage(named: "empty.png"){
-                                sender.setImage(image, for: .normal)
-                            }
-                            global.delete(result)
-                            print("favorite removed")
-                            return
-                        }
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        let nameListObj = UserDefaults.standard.object(forKey: "favoriteName")
+        let urlListObj = UserDefaults.standard.object(forKey: "favoriteUrl")
+        let typeListObj = UserDefaults.standard.object(forKey: "favoriteType")
+        if var idList = idListObj as? Array<String>{
+            var i = 0
+            while i<idList.count{
+                if idList[i] == sender.id{
+                    if let image = UIImage(named: "empty.png"){
+                        sender.setImage(image, for: .normal)
                     }
+                    idList.remove(at: i)
+                    if var nameList = nameListObj as? Array<String>{
+                        nameList.remove(at: i)
+                        UserDefaults.standard.set(nameList, forKey: "favoriteName")
+                    }
+                    if var urlList = urlListObj as? Array<String>{
+                        urlList.remove(at: i)
+                        UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+                    }
+                    if var typeList = typeListObj as? Array<String>{
+                        typeList.remove(at: i)
+                        UserDefaults.standard.set(typeList, forKey: "favoriteType")
+                    }
+                    UserDefaults.standard.set(idList, forKey: "favoriteId")
+                    return
                 }
+                i+=1
             }
-            let newFavorite = NSEntityDescription.insertNewObject(forEntityName: "Favorite", into: global)
-            newFavorite.setValue(sender.id, forKey: "id")
-            newFavorite.setValue(sender.url, forKey: "url")
-            newFavorite.setValue(sender.name, forKey: "name")
-            newFavorite.setValue(sender.type, forKey: "type")
-            
-            do{
-                try global.save();
-                print("favorite saved")
-                if let image = UIImage(named: "filled.png"){
-                    sender.setImage(image, for: .normal)
-                }
-            } catch{
-                print("fails to save favorite")
-            }
-        }catch{
-            print("fetch favorite result failing")
         }
         
-        do{
-            let results = try global.fetch(request)
-            if results.count>0{
-                for result in results as! [NSManagedObject]{
-                    if let temp = result.value(forKey: "name") as? String{
-                        print("user name = " + temp)
-                    }
-                }
-            }
+        if var idList = idListObj as? Array<String>{
+            idList.append(sender.id!)
+            UserDefaults.standard.set(idList, forKey: "favoriteId")
         }
-        catch{
-            print("show all favorite result fails")
+        else{
+            let idList = [sender.id!]
+            UserDefaults.standard.set(idList, forKey: "favoriteId")
+        }
+        
+        if var nameList = nameListObj as? Array<String>{
+            nameList.append(sender.name!)
+            UserDefaults.standard.set(nameList, forKey: "favoriteName")
+        }
+        else{
+            let nameList = [sender.name!]
+            UserDefaults.standard.set(nameList, forKey: "favoriteName")
+        }
+        
+        if var urlList = urlListObj as? Array<String>{
+            urlList.append(sender.url!)
+            UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+        }
+        else{
+            let urlList = [sender.url!]
+            UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+        }
+        
+        if var typeList = typeListObj as? Array<String>{
+            typeList.append(sender.type)
+            UserDefaults.standard.set(typeList, forKey: "favoriteType")
+        }
+        else{
+            let typeList = [sender.type]
+            UserDefaults.standard.set(typeList, forKey: "favoriteType")
+        }
+        
+        if let image = UIImage(named: "filled.png"){
+            sender.setImage(image, for: .normal)
         }
         
     }
@@ -200,36 +205,49 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        SwiftSpinner.show(duration:1.5, title:"Loading data...")
-        open.target = self.revealViewController()
-        open.action = #selector(SWRevealViewController.revealToggle(_:))
+        locationManager.requestWhenInUseAuthorization()
         
-        //get global object
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Query")
-        request.returnsObjectsAsFaults = false;
-        do{
-            let result = try global.fetch(request)
-            if result.count>0{
-                if let myStr = (result[result.count-1] as! NSManagedObject).value(forKey: "keyword") as? String{
-                    self.stringPassed = myStr;
+        var currentLocation = CLLocation()
+        
+        if( CLLocationManager.authorizationStatus() == CLAuthorizationStatus.authorizedWhenInUse){
+            
+            currentLocation = locationManager.location!
+            
+            SwiftSpinner.show(duration:1.5, title:"Loading data...")
+            open.target = self.revealViewController()
+            open.action = #selector(SWRevealViewController.revealToggle(_:))
+            
+            //get global object
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate;
+            let global = appDelegate.persistentContainer.viewContext
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Query")
+            request.returnsObjectsAsFaults = false;
+            do{
+                let result = try global.fetch(request)
+                if result.count>0{
+                    if let myStr = (result[result.count-1] as! NSManagedObject).value(forKey: "keyword") as? String{
+                        self.stringPassed = myStr;
+                    }
                 }
+                
+            }catch{
+                print("fetch result failing")
+            }
+            let lat:String = (String)(currentLocation.coordinate.latitude)
+            let lon:String = (String)(currentLocation.coordinate.longitude)
+            Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=place!center="+lat+","+lon+"!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAPunL5N6OI0irmVe5ek5SeRyXVFdrA9l5wBIOpnxgEnrA2IprU6YshZC4d4EQ9XnpfLCXcHdPC3rk3kZC5qT0p0caZC0FdXsviOPRS0JzYDagSIkP7EOwCCGuZCrs6SHJNYOR1eYHNQkUze1iagZD&isDetail=0").responseJSON { response in
+                
+                if let resultValue = response.result.value {
+                    self.json = JSON(resultValue)
+                    self.placeTable.reloadData()
+                }
+                
+                self.jsonReload();
             }
             
-        }catch{
-            print("fetch result failing")
         }
         
-        Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=place!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAPunL5N6OI0irmVe5ek5SeRyXVFdrA9l5wBIOpnxgEnrA2IprU6YshZC4d4EQ9XnpfLCXcHdPC3rk3kZC5qT0p0caZC0FdXsviOPRS0JzYDagSIkP7EOwCCGuZCrs6SHJNYOR1eYHNQkUze1iagZD&isDetail=0").responseJSON { response in
-            
-            if let resultValue = response.result.value {
-                self.json = JSON(resultValue)
-                self.placeTable.reloadData()
-            }
-            
-            self.jsonReload();
-        }
+        
         // Do any additional setup after loading the view.
     }
     

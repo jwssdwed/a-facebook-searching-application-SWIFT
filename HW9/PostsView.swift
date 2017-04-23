@@ -9,6 +9,7 @@
 import UIKit
 import Alamofire
 import SwiftyJSON
+import SwiftSpinner
 
 class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
 //    @IBOutlet weak var noData: UITableView!
@@ -19,12 +20,134 @@ class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
     @IBAction func back(_ sender: Any) {
         if let nav = self.navigationController {
             nav.popViewController(animated: true)
+            SwiftSpinner.show(duration:1.5, title:"Loading data...")
         } else {
             self.dismiss(animated: true, completion: nil)
+            SwiftSpinner.show(duration:1.5, title:"Loading data...")
         }
         
     }
     
+    @IBAction func moreFunc(_ sender: Any) {
+        let alertController = UIAlertController(title: nil, message: "Menu", preferredStyle: .actionSheet)
+        let shareAction = UIAlertAction(title: "Share", style:.default){action in
+            
+            //configurate fb SHARE request
+            let content = FBSDKShareLinkContent()
+            content.contentDescription="FB Share for CSCI 571"
+            content.contentTitle = MyGlobal.passedName
+            content.imageURL = NSURL(string: MyGlobal.profileUrl) as URL!
+            let shareDialog: FBSDKShareDialog = FBSDKShareDialog()
+            
+            shareDialog.shareContent = content
+            
+            shareDialog.delegate = nil
+            shareDialog.fromViewController = self
+            shareDialog.show()
+            
+        }
+        
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        let nameListObj = UserDefaults.standard.object(forKey: "favoriteName")
+        let urlListObj = UserDefaults.standard.object(forKey: "favoriteUrl")
+        let typeListObj = UserDefaults.standard.object(forKey: "favoriteType")
+        
+        var exist:Bool = false
+        
+        if var idList = idListObj as? Array<String>{
+            var i = 0
+            while i<idList.count{
+                if idList[i] == MyGlobal.id{
+                    exist = true
+                    break
+                }
+                i+=1
+            }
+        }
+        
+        let favoriteAction = UIAlertAction(title: "Add to favorites", style:.default){action in
+            if var idList = idListObj as? Array<String>{
+                idList.append(MyGlobal.id)
+                UserDefaults.standard.set(idList, forKey: "favoriteId")
+            }
+            else{
+                let idList = [MyGlobal.id]
+                UserDefaults.standard.set(idList, forKey: "favoriteId")
+            }
+            
+            if var nameList = nameListObj as? Array<String>{
+                nameList.append(MyGlobal.passedName)
+                UserDefaults.standard.set(nameList, forKey: "favoriteName")
+            }
+            else{
+                let nameList = [MyGlobal.passedName]
+                UserDefaults.standard.set(nameList, forKey: "favoriteName")
+            }
+            
+            if var urlList = urlListObj as? Array<String>{
+                urlList.append(MyGlobal.profileUrl)
+                UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+            }
+            else{
+                let urlList = [MyGlobal.profileUrl]
+                UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+            }
+            
+            if var typeList = typeListObj as? Array<String>{
+                typeList.append(MyGlobal.type)
+                UserDefaults.standard.set(typeList, forKey: "favoriteType")
+            }
+            else{
+                let typeList = [MyGlobal.type]
+                UserDefaults.standard.set(typeList, forKey: "favoriteType")
+            }
+        }
+        let removeFavoriteAction = UIAlertAction(title: "Remove from favorites", style: .default){ action in
+            if var idList = idListObj as? Array<String>{
+                var i = 0
+                while i<idList.count{
+                    if idList[i] == MyGlobal.id{
+                        idList.remove(at: i)
+                        if var nameList = nameListObj as? Array<String>{
+                            nameList.remove(at: i)
+                            UserDefaults.standard.set(nameList, forKey: "favoriteName")
+                        }
+                        if var urlList = urlListObj as? Array<String>{
+                            urlList.remove(at: i)
+                            UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+                        }
+                        if var typeList = typeListObj as? Array<String>{
+                            typeList.remove(at: i)
+                            UserDefaults.standard.set(typeList, forKey: "favoriteType")
+                        }
+                        UserDefaults.standard.set(idList, forKey: "favoriteId")
+                        break;
+                    }
+                    i+=1
+                }
+            }
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive){ action in
+            print("Cancel")
+        }
+        
+        
+        if exist{
+            alertController.addAction(removeFavoriteAction)
+            alertController.addAction(shareAction)
+            alertController.addAction(cancelAction)
+        }
+        else{
+            alertController.addAction(favoriteAction)
+            alertController.addAction(shareAction)
+            alertController.addAction(cancelAction)
+        }
+        
+        
+        self.present(alertController, animated: true) {
+            // ...
+        }
+    }
 
     @available(iOS 2.0, *)
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
@@ -67,6 +190,8 @@ class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        SwiftSpinner.show(duration: 1.5, title: "Loading data...")
+        
         postTable.estimatedRowHeight = 100;
         postTable.rowHeight = UITableViewAutomaticDimension
         

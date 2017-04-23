@@ -44,26 +44,33 @@ class PlaceFavorite: UIViewController, UITableViewDataSource, UITableViewDelegat
     
     func like(sender: FavoriteButton){
         //get global object
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
-        request.returnsObjectsAsFaults = false;
-        do{
-            let results = try global.fetch(request)
-            if results.count>0{
-                for result in results as! [NSManagedObject]{
-                    if let tempId = result.value(forKey: "id") as? String{
-                        if tempId == sender.id{
-                            global.delete(result)
-                            print("favorite removed")
-                            updateTable()
-                            return;
-                        }
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        let nameListObj = UserDefaults.standard.object(forKey: "favoriteName")
+        let urlListObj = UserDefaults.standard.object(forKey: "favoriteUrl")
+        let typeListObj = UserDefaults.standard.object(forKey: "favoriteType")
+        if var idList = idListObj as? Array<String>{
+            var i = 0
+            while i<idList.count{
+                if idList[i] == sender.id{
+                    idList.remove(at: i)
+                    if var nameList = nameListObj as? Array<String>{
+                        nameList.remove(at: i)
+                        UserDefaults.standard.set(nameList, forKey: "favoriteName")
                     }
+                    if var urlList = urlListObj as? Array<String>{
+                        urlList.remove(at: i)
+                        UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+                    }
+                    if var typeList = typeListObj as? Array<String>{
+                        typeList.remove(at: i)
+                        UserDefaults.standard.set(typeList, forKey: "favoriteType")
+                    }
+                    UserDefaults.standard.set(idList, forKey: "favoriteId")
+                    updateTable()
+                    return
                 }
+                i+=1
             }
-        }catch{
-            print("fetch favorite result failing")
         }
         
     }
@@ -99,32 +106,26 @@ class PlaceFavorite: UIViewController, UITableViewDataSource, UITableViewDelegat
         names.removeAll()
         profiles.removeAll()
         
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
-        request.returnsObjectsAsFaults = false;
-        do{
-            let results = try global.fetch(request)
-            if results.count>0{
-                for result in results as! [NSManagedObject]{
-                    if let tempType = result.value(forKey: "type") as? String{
-                        if tempType == "place"{
-                            if let tempId = result.value(forKey: "id") as? String{
-                                ids.append(tempId)
-                            }
-                            if let tempName = result.value(forKey: "name") as? String{
-                                names.append(tempName)
-                            }
-                            if let tempUrl = result.value(forKey: "url") as? String{
-                                profiles.append(tempUrl)
-                            }
-                        }
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        let nameListObj = UserDefaults.standard.object(forKey: "favoriteName")
+        let urlListObj = UserDefaults.standard.object(forKey: "favoriteUrl")
+        let typeListObj = UserDefaults.standard.object(forKey: "favoriteType")
+        if var typeList = typeListObj as? Array<String>{
+            var i = 0
+            while i<typeList.count{
+                if typeList[i] == "place"{
+                    if var idList = idListObj as? Array<String>{
+                        ids.append(idList[i])
+                    }
+                    if var urlList = urlListObj as? Array<String>{
+                        profiles.append(urlList[i])
+                    }
+                    if var nameList = nameListObj as? Array<String>{
+                        names.append(nameList[i])
                     }
                 }
+                i+=1
             }
-        }
-        catch{
-            print("fails to fetch favorite data")
         }
         self.placeFavTable.reloadData()
     }

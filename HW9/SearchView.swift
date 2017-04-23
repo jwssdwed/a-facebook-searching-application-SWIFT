@@ -74,9 +74,6 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
     }
     @available(iOS 2.0, *)
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
-        if json["data"].count == 0{
-            SwiftSpinner.hide()
-        }
         return json["data"].count;
     }
     
@@ -99,27 +96,14 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         cell.favoriteButton.type = "user";
         cell.favoriteButton.addTarget(self, action: #selector(SearchView.like(sender:)), for: .touchUpInside)
         
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate;
-        let global = appDelegate.persistentContainer.viewContext
-        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Favorite")
-        request.returnsObjectsAsFaults = false;
-        do{
-            let results = try global.fetch(request)
-            if results.count > 0 {
-                for result in results as! [NSManagedObject]{
-                    if let tempId = result.value(forKey: "id") as? String{
-                        if tempId == cell.favoriteButton.id{
-                            if let image = UIImage(named: "filled.png"){
-                                cell.favoriteButton.setImage(image, for: .normal)
-                                return cell;
-                            }
-                        }
-                    }
+        let idListObj = UserDefaults.standard.object(forKey: "favoriteId")
+        if let idList = idListObj as? Array<String>{
+            for id in idList {
+                if id == cell.favoriteButton.id{
+                    cell.favoriteButton.setImage(UIImage(named:"filled.png"), for: .normal)
+                    return cell
                 }
             }
-        }
-        catch{
-            print("fails to fetch all favorited information")
         }
         cell.favoriteButton.setImage(UIImage(named:"empty.png"), for: .normal)
         
@@ -142,21 +126,63 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
                     idList.remove(at: i)
                     if var nameList = nameListObj as? Array<String>{
                         nameList.remove(at: i)
+                        UserDefaults.standard.set(nameList, forKey: "favoriteName")
                     }
                     if var urlList = urlListObj as? Array<String>{
                         urlList.remove(at: i)
+                        UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
                     }
                     if var typeList = typeListObj as? Array<String>{
                         typeList.remove(at: i)
+                        UserDefaults.standard.set(typeList, forKey: "favoriteType")
                     }
+                    UserDefaults.standard.set(idList, forKey: "favoriteId")
                     return
                 }
                 i+=1
             }
         }
         
+        if var idList = idListObj as? Array<String>{
+            idList.append(sender.id!)
+            UserDefaults.standard.set(idList, forKey: "favoriteId")
+        }
+        else{
+            let idList = [sender.id!]
+            UserDefaults.standard.set(idList, forKey: "favoriteId")
+        }
         
+        if var nameList = nameListObj as? Array<String>{
+            nameList.append(sender.name!)
+            UserDefaults.standard.set(nameList, forKey: "favoriteName")
+        }
+        else{
+            let nameList = [sender.name!]
+            UserDefaults.standard.set(nameList, forKey: "favoriteName")
+        }
         
+        if var urlList = urlListObj as? Array<String>{
+            urlList.append(sender.url!)
+            UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+        }
+        else{
+            let urlList = [sender.url!]
+            UserDefaults.standard.set(urlList, forKey: "favoriteUrl")
+        }
+        
+        if var typeList = typeListObj as? Array<String>{
+            typeList.append(sender.type)
+            UserDefaults.standard.set(typeList, forKey: "favoriteType")
+        }
+        else{
+            let typeList = [sender.type]
+            UserDefaults.standard.set(typeList, forKey: "favoriteType")
+        }
+        
+        if let image = UIImage(named: "filled.png"){
+            sender.setImage(image, for: .normal)
+        }
+
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

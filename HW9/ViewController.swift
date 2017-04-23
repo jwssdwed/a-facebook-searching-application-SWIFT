@@ -44,26 +44,8 @@ class ViewController: UIViewController {
             } catch{
                 print("save the keyword failing")
             }
-            print(self.revealViewController())
             self.performSegue(withIdentifier: "searchNow", sender: self)
         }
-    }
-    
-    func showToast(message : String) {
-        toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2-100, y: self.view.frame.size.height, width: 200, height: 35))
-        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
-        toastLabel.textColor = UIColor.white
-        toastLabel.textAlignment = .center;
-        toastLabel.font = UIFont(name: "Montserrat-Light", size: 12.0)
-        toastLabel.text = message
-        toastLabel.layer.cornerRadius = 10;
-        toastLabel.clipsToBounds  =  true
-        self.view.addSubview(toastLabel)
-        UIView.animate(withDuration: 0.5, delay: 0.1, options: .showHideTransitionViews, animations: {
-            self.toastLabel.center.y -= 100
-        },
-            completion: nil
-        )
     }
     
     let appDelegate = UIApplication.shared.delegate as! AppDelegate;

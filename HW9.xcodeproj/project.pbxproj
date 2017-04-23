@@ -16,6 +16,7 @@
 		213088471EA480C200072B6F /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213088461EA480C200072B6F /* EventView.swift */; };
 		213088491EA4856900072B6F /* PlaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213088481EA4856900072B6F /* PlaceView.swift */; };
 		2130884B1EA48A2C00072B6F /* GroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2130884A1EA48A2C00072B6F /* GroupView.swift */; };
+		21338CD51EAC24D800F99737 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21338CD41EAC24D800F99737 /* CoreLocation.framework */; };
 		215B00491EA043B2008D6FCA /* DetailTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B00481EA043B2008D6FCA /* DetailTab.swift */; };
 		215B004B1EA044D3008D6FCA /* AlbumsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B004A1EA044D3008D6FCA /* AlbumsView.swift */; };
 		215B004D1EA044EF008D6FCA /* PostsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B004C1EA044EF008D6FCA /* PostsView.swift */; };
@@ -69,6 +70,7 @@
 		213088461EA480C200072B6F /* EventView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
 		213088481EA4856900072B6F /* PlaceView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaceView.swift; sourceTree = "<group>"; };
 		2130884A1EA48A2C00072B6F /* GroupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupView.swift; sourceTree = "<group>"; };
+		21338CD41EAC24D800F99737 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		215B00481EA043B2008D6FCA /* DetailTab.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailTab.swift; sourceTree = "<group>"; };
 		215B004A1EA044D3008D6FCA /* AlbumsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumsView.swift; sourceTree = "<group>"; };
 		215B004C1EA044EF008D6FCA /* PostsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostsView.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21338CD51EAC24D800F99737 /* CoreLocation.framework in Frameworks */,
 				C419B5B99AD5280003A2A0C8 /* Pods_HW9.framework in Frameworks */,
 				21A4C94D1EA5BC5500834338 /* FBSDKCoreKit.framework in Frameworks */,
 				21A4C94E1EA5BC5500834338 /* FBSDKShareKit.framework in Frameworks */,
@@ -225,6 +228,7 @@
 		2D197C3D0E23C90F708116D7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				21338CD41EAC24D800F99737 /* CoreLocation.framework */,
 				EA2EDF15623FFA53D71D5E2C /* Pods_HW9.framework */,
 			);
 			name = Frameworks;
