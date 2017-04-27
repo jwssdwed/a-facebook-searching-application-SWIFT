@@ -62,13 +62,13 @@
 	<string>685739664939898</string>
 	<key>FacebookDisplayName</key>
 	<string>CSCI571hw</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>fbapi</string>
-		<string>fb-messenger-api</string>
-		<string>fbauth2</string>
-		<string>fbshareextension</string>
-	</array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>fbapi</string>
+        <string>fb-messenger-api</string>
+        <string>fbauth2</string>
+        <string>fbshareextension</string>
+    </array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This is used for USC CSCI570 HW9 Facebook Share function</string>
 </dict>

@@ -141,6 +141,7 @@ class EventView: UIViewController, UITableViewDelegate, UITableViewDataSource {
                         UserDefaults.standard.set(typeList, forKey: "favoriteType")
                     }
                     UserDefaults.standard.set(idList, forKey: "favoriteId")
+                    self.view.showToast("Removed from favorites!", position: .bottom, popTime: 1, dismissOnTap: false);
                     return
                 }
                 i+=1
@@ -186,7 +187,7 @@ class EventView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         if let image = UIImage(named: "filled.png"){
             sender.setImage(image, for: .normal)
         }
-        
+        self.view.showToast("Add to favorites!", position: .bottom, popTime: 1, dismissOnTap: false);
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -204,8 +205,11 @@ class EventView: UIViewController, UITableViewDelegate, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         SwiftSpinner.show(duration:1.5, title:"Loading data...")
-        open.target = self.revealViewController()
-        open.action = #selector(SWRevealViewController.revealToggle(_:))
+        if self.revealViewController() != nil {
+            open.target = self.revealViewController()
+            open.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(revealViewController().panGestureRecognizer())
+        }
         //get global object
         let appDelegate = UIApplication.shared.delegate as! AppDelegate;
         let global = appDelegate.persistentContainer.viewContext
@@ -223,7 +227,7 @@ class EventView: UIViewController, UITableViewDelegate, UITableViewDataSource {
             print("fetch result failing")
         }
         
-        Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=event!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAPunL5N6OI0irmVe5ek5SeRyXVFdrA9l5wBIOpnxgEnrA2IprU6YshZC4d4EQ9XnpfLCXcHdPC3rk3kZC5qT0p0caZC0FdXsviOPRS0JzYDagSIkP7EOwCCGuZCrs6SHJNYOR1eYHNQkUze1iagZD&isDetail=0").responseJSON { response in
+        Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=event!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAE7Jd9lGZCon7UuHjY96nICOamYwgVVzkKYQrsqLSffzfzSZCCmfWyrO1oHdz4SAL08s66EvZCZCqTIwYn5suMEQh9MatXewbkxb9p7tlnEurcA8snpHtNW1MbA9Kn1jd26elTQEK7f6sdS1RuwZD&isDetail=0").responseJSON { response in
             
             if let resultValue = response.result.value {
                 self.json = JSON(resultValue)

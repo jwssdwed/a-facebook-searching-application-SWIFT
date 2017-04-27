@@ -13,8 +13,11 @@ class AboutMe: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        open.target = self.revealViewController()
-        open.action = #selector(SWRevealViewController.revealToggle(_:))
+        if self.revealViewController() != nil {
+            open.target = self.revealViewController()
+            open.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(revealViewController().panGestureRecognizer())
+        }
         // Do any additional setup after loading the view.
     }
 

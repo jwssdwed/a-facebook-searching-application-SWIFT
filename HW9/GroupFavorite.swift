@@ -84,9 +84,11 @@ class GroupFavorite: UIViewController,UITableViewDelegate,UITableViewDataSource 
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        open.target = self.revealViewController()
-        open.action = #selector(SWRevealViewController.revealToggle(_:))
-        
+        if self.revealViewController() != nil {
+            open.target = self.revealViewController()
+            open.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(revealViewController().panGestureRecognizer())
+        }
         //initialize
         previousButton.isEnabled = false
         nextButton.isEnabled = false

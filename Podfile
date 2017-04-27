@@ -11,6 +11,9 @@ target 'HW9' do
   # Pods for HW9
 pod "SwiftSpinner"
 pod 'EasyToast'
+pod 'FacebookCore'
+pod 'FacebookLogin'
+pod 'FacebookShare'
 pod 'SwiftyJSON'
 pod 'Alamofire', '~> 4.4'
 
