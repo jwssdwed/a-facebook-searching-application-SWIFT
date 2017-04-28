@@ -31,13 +31,18 @@ class AlbumsView: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @IBOutlet weak var noData: UILabel!
     
     @IBAction func back(_ sender: Any) {
-        if let nav = self.navigationController {
-            nav.popViewController(animated: true)
+        if self.navigationController != nil {
+            self.navigationController?.popViewController(animated: true)
             SwiftSpinner.show(duration:1, title:"Loading data...")
         } else {
-            
-            self.dismiss(animated: true, completion: nil)
-            SwiftSpinner.show(duration:1, title:"Loading data...")
+            let transition: CATransition = CATransition()
+            transition.duration = 0.5
+            transition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+            transition.type = kCATransitionReveal
+            transition.subtype = kCATransitionFromLeft
+            self.view.window!.layer.add(transition, forKey: nil)
+            self.dismiss(animated: false, completion: nil)
+            //            SwiftSpinner.show(duration:1, title:"Loading data...")
         }
         
     }
@@ -266,6 +271,7 @@ class AlbumsView: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     override func viewDidLoad() {
         SwiftSpinner.show(duration: 1.5, title: "Loading data...")
         super.viewDidLoad()
+        self.navigationItem.title = "Detail"
         //since the detail graph call contains some special character, we need to encode it before parse.
         let original = "http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/"+MyGlobal.id+"?fields=albums.limit(5){name,photos.limit(2){name,picture}},posts.limit(5){message,created_time}!access_token=EAAJvrTUjG3oBAE7Jd9lGZCon7UuHjY96nICOamYwgVVzkKYQrsqLSffzfzSZCCmfWyrO1oHdz4SAL08s66EvZCZCqTIwYn5suMEQh9MatXewbkxb9p7tlnEurcA8snpHtNW1MbA9Kn1jd26elTQEK7f6sdS1RuwZD"
         if let encodedString = original.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed)

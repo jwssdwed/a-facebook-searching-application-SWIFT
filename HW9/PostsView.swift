@@ -32,12 +32,19 @@ class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate, FB
     @IBOutlet weak var postTable: UITableView!
     
     @IBAction func back(_ sender: Any) {
-        if let nav = self.navigationController {
-            nav.popViewController(animated: true)
-            SwiftSpinner.show(duration:1.5, title:"Loading data...")
+        if self.navigationController != nil {
+            self.navigationController?.popViewController(animated: true)
+            SwiftSpinner.show(duration:1, title:"Loading data...")
         } else {
-            self.dismiss(animated: true, completion: nil)
-            SwiftSpinner.show(duration:1.5, title:"Loading data...")
+            print("here")
+            let transition: CATransition = CATransition()
+            transition.duration = 0.5
+            transition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+            transition.type = kCATransitionPush
+            transition.subtype = kCATransitionFromLeft
+            self.view.window!.layer.add(transition, forKey: nil)
+            self.dismiss(animated: false, completion: nil)
+            //            SwiftSpinner.show(duration:1, title:"Loading data...")
         }
         
     }

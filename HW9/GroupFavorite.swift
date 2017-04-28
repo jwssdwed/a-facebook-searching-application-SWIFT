@@ -135,6 +135,8 @@ class GroupFavorite: UIViewController,UITableViewDelegate,UITableViewDataSource 
         updateTable()
     }
     
+    
+    
     /*
      // MARK: - Navigation
      

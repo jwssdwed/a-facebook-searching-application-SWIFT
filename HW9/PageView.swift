@@ -56,12 +56,19 @@ class PageView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         }
         //judge whether we are supposed to enable next button
         if let nexPage = self.json["paging"]["next"].rawString() {
-            if (nexPage != "null") {
-                self.nextPage = nexPage;
-                self.nextButton.isEnabled = true
-            }
-            else{
-                self.nextButton.isEnabled = false;
+            Alamofire.request(nexPage).responseJSON { response in
+                if let resultValue = response.result.value {
+                    let tempJson = JSON(resultValue)
+                    if tempJson["data"].count > 0{
+                        self.nextButton.isEnabled = true
+                        self.nextPage = nexPage;
+                    }else{
+                        self.nextButton.isEnabled = false
+                    }
+                }
+                else{
+                    self.nextButton.isEnabled = false;
+                }
             }
         }
         else{
@@ -245,4 +252,15 @@ class PageView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+//        
+//        let transition = CATransition()
+//        transition.duration = 0.3
+//        transition.type = kCATransitionPush
+//        transition.subtype = kCATransitionFromRight
+//        
+//        self.view.window!.layer.add(transition, forKey: kCATransition)
+//        self.present(segue.destination, animated: false, completion: nil)
+//    }
 }

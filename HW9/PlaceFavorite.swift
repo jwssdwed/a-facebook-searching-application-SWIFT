@@ -137,6 +137,8 @@ class PlaceFavorite: UIViewController, UITableViewDataSource, UITableViewDelegat
         updateTable()
     }
     
+    
+    
     /*
      // MARK: - Navigation
      

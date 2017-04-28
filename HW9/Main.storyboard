@@ -27,7 +27,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" spellCheckingType="no"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lPN-QW-Rxk">
                                 <rect key="frame" x="37" y="310" width="86" height="47"/>
@@ -1676,6 +1676,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="xtc-1f-W9E"/>
-        <segue reference="czU-Ml-wVA"/>
+        <segue reference="qdH-wW-OmU"/>
     </inferredMetricsTieBreakers>
 </document>
