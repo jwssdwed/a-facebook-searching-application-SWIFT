@@ -10,6 +10,7 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 import SwiftSpinner
+import EasyToast
 import CoreData
 
 class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -27,7 +28,7 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         }
         
     }
-    
+
     func jsonReload() {
         //judge whether we are supposed to enable previous button
         if let prePage = self.json["paging"]["previous"].rawString() {
@@ -44,12 +45,19 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         }
         //judge whether we are supposed to enable next button
         if let nexPage = self.json["paging"]["next"].rawString() {
-            if (nexPage != "null") {
-                self.nextPage = nexPage;
-                self.nextButton.isEnabled = true
-            }
-            else{
-                self.nextButton.isEnabled = false;
+            Alamofire.request(nexPage).responseJSON { response in
+                if let resultValue = response.result.value {
+                    let tempJson = JSON(resultValue)
+                    if tempJson["data"].count > 0{
+                        self.nextButton.isEnabled = true
+                        self.nextPage = nexPage;
+                    }else{
+                        self.nextButton.isEnabled = false
+                    }
+                }
+                else{
+                    self.nextButton.isEnabled = false;
+                }
             }
         }
         else{
@@ -57,9 +65,6 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         }
     }
     @IBOutlet weak var open: UIBarButtonItem!
-    @IBAction func open(_ sender: Any) {
-        print("you press the menu button")
-    }
     
     @IBAction func next(_ sender: Any) {
         Alamofire.request(self.nextPage).responseJSON { response in
@@ -137,6 +142,7 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
                         UserDefaults.standard.set(typeList, forKey: "favoriteType")
                     }
                     UserDefaults.standard.set(idList, forKey: "favoriteId")
+                    self.view.showToast("Removed from favorites!", position: .bottom, popTime: 1, dismissOnTap: false);
                     return
                 }
                 i+=1
@@ -182,7 +188,8 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         if let image = UIImage(named: "filled.png"){
             sender.setImage(image, for: .normal)
         }
-
+        
+        self.view.showToast("Add to favorites!", position: .bottom, popTime: 1, dismissOnTap: false);
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -221,9 +228,8 @@ class SearchView: UIViewController, UITableViewDelegate, UITableViewDataSource {
         }catch{
             print("fetch result failing")
         }
-        print("keyword = " + self.stringPassed)
         //send request to AWS and get JSON file
-        Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=user!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAPunL5N6OI0irmVe5ek5SeRyXVFdrA9l5wBIOpnxgEnrA2IprU6YshZC4d4EQ9XnpfLCXcHdPC3rk3kZC5qT0p0caZC0FdXsviOPRS0JzYDagSIkP7EOwCCGuZCrs6SHJNYOR1eYHNQkUze1iagZD&isDetail=0").responseJSON { response in
+        Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=user!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAE7Jd9lGZCon7UuHjY96nICOamYwgVVzkKYQrsqLSffzfzSZCCmfWyrO1oHdz4SAL08s66EvZCZCqTIwYn5suMEQh9MatXewbkxb9p7tlnEurcA8snpHtNW1MbA9Kn1jd26elTQEK7f6sdS1RuwZD&isDetail=0").responseJSON { response in
             
             if let resultValue = response.result.value {
                 self.json = JSON(resultValue)

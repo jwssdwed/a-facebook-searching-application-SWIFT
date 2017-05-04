@@ -28,7 +28,7 @@ class ViewController: UIViewController {
     
     @IBAction func search(_ sender: Any) {
         if keyword.text == "" {
-            self.view.showToast("Enter a valid Query", position: .bottom, popTime: kToastNoPopTime, dismissOnTap: true)
+            self.view.showToast("Enter a valid Query", position: .bottom, popTime: 2, dismissOnTap: false)
         }
         else{
             //replace space with "%20"
@@ -40,7 +40,6 @@ class ViewController: UIViewController {
             newKeyword.setValue(processedKeyword, forKey: "keyword")
             do{
                 try global.save();
-                print("saved")
             } catch{
                 print("save the keyword failing")
             }
@@ -55,9 +54,11 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         self.navigationController?.isNavigationBarHidden = true;
-        open.target = self.revealViewController()
-        open.action = #selector(SWRevealViewController.revealToggle(_:))
-        
+        if self.revealViewController() != nil {
+            open.target = self.revealViewController()
+            open.action = #selector(SWRevealViewController.revealToggle(_:))
+            view.addGestureRecognizer(revealViewController().panGestureRecognizer())
+        }
         let global = appDelegate.persistentContainer.viewContext
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Query")
         request.returnsObjectsAsFaults = false;

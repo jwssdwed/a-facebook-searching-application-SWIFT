@@ -61,12 +61,19 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource, C
         }
         //judge whether we are supposed to enable next button
         if let nexPage = self.json["paging"]["next"].rawString() {
-            if (nexPage != "null") {
-                self.nextPage = nexPage;
-                self.nextButton.isEnabled = true
-            }
-            else{
-                self.nextButton.isEnabled = false;
+            Alamofire.request(nexPage).responseJSON { response in
+                if let resultValue = response.result.value {
+                    let tempJson = JSON(resultValue)
+                    if tempJson["data"].count > 0{
+                        self.nextButton.isEnabled = true
+                        self.nextPage = nexPage;
+                    }else{
+                        self.nextButton.isEnabled = false
+                    }
+                }
+                else{
+                    self.nextButton.isEnabled = false;
+                }
             }
         }
         else{
@@ -142,6 +149,7 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource, C
                         UserDefaults.standard.set(typeList, forKey: "favoriteType")
                     }
                     UserDefaults.standard.set(idList, forKey: "favoriteId")
+                    self.view.showToast("Removed from favorites!", position: .bottom, popTime: 1, dismissOnTap: false);
                     return
                 }
                 i+=1
@@ -187,7 +195,7 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource, C
         if let image = UIImage(named: "filled.png"){
             sender.setImage(image, for: .normal)
         }
-        
+        self.view.showToast("Add to favorites!", position: .bottom, popTime: 1, dismissOnTap: false);
     }
     
     //update our global variables
@@ -205,6 +213,7 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource, C
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //location authorization to let user allow this app get current location.
         locationManager.requestWhenInUseAuthorization()
         
         var currentLocation = CLLocation()
@@ -214,8 +223,11 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource, C
             currentLocation = locationManager.location!
             
             SwiftSpinner.show(duration:1.5, title:"Loading data...")
-            open.target = self.revealViewController()
-            open.action = #selector(SWRevealViewController.revealToggle(_:))
+            if self.revealViewController() != nil {
+                open.target = self.revealViewController()
+                open.action = #selector(SWRevealViewController.revealToggle(_:))
+                view.addGestureRecognizer(revealViewController().panGestureRecognizer())
+            }
             
             //get global object
             let appDelegate = UIApplication.shared.delegate as! AppDelegate;
@@ -233,9 +245,9 @@ class PlaceView: UIViewController, UITableViewDelegate, UITableViewDataSource, C
             }catch{
                 print("fetch result failing")
             }
-            let lat:String = (String)(currentLocation.coordinate.latitude)
-            let lon:String = (String)(currentLocation.coordinate.longitude)
-            Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=place!center="+lat+","+lon+"!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAPunL5N6OI0irmVe5ek5SeRyXVFdrA9l5wBIOpnxgEnrA2IprU6YshZC4d4EQ9XnpfLCXcHdPC3rk3kZC5qT0p0caZC0FdXsviOPRS0JzYDagSIkP7EOwCCGuZCrs6SHJNYOR1eYHNQkUze1iagZD&isDetail=0").responseJSON { response in
+            let lat:String = (String)(currentLocation.coordinate.latitude)  //latitude
+            let lon:String = (String)(currentLocation.coordinate.longitude) //longitude
+            Alamofire.request("http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/search?q="+self.stringPassed+"!type=place!center="+lat+","+lon+"!fields=id,name,picture.width(700).height(700)!limit=10!access_token=EAAJvrTUjG3oBAE7Jd9lGZCon7UuHjY96nICOamYwgVVzkKYQrsqLSffzfzSZCCmfWyrO1oHdz4SAL08s66EvZCZCqTIwYn5suMEQh9MatXewbkxb9p7tlnEurcA8snpHtNW1MbA9Kn1jd26elTQEK7f6sdS1RuwZD&isDetail=0").responseJSON { response in
                 
                 if let resultValue = response.result.value {
                     self.json = JSON(resultValue)

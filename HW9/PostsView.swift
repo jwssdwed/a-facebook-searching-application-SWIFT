@@ -10,20 +10,41 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 import SwiftSpinner
+import EasyToast
+import FBSDKShareKit
 
-class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
-//    @IBOutlet weak var noData: UITableView!
+class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate, FBSDKSharingDelegate {
     @IBOutlet weak var noData: UILabel!
+    
+    func sharer(_ sharer: FBSDKSharing!, didCompleteWithResults results: [AnyHashable : Any]!) {
+        self.view.showToast("Shared!", position: .bottom, popTime: 1, dismissOnTap: false)
+    }
+    
+    func sharer(_ sharer: FBSDKSharing!, didFailWithError error: Error!) {
+        self.view.showToast("Share failed!", position: .bottom, popTime: 1, dismissOnTap: false)
+    }
+    
+    func sharerDidCancel(_ sharer: FBSDKSharing!) {
+        print("Cancel")
+        self.view.showToast("Cancelled!", position: .bottom, popTime: 1, dismissOnTap: false)
+    }
     
     @IBOutlet weak var postTable: UITableView!
     
     @IBAction func back(_ sender: Any) {
-        if let nav = self.navigationController {
-            nav.popViewController(animated: true)
-            SwiftSpinner.show(duration:1.5, title:"Loading data...")
+        if self.navigationController != nil {
+            self.navigationController?.popViewController(animated: true)
+            SwiftSpinner.show(duration:1, title:"Loading data...")
         } else {
-            self.dismiss(animated: true, completion: nil)
-            SwiftSpinner.show(duration:1.5, title:"Loading data...")
+            print("here")
+            let transition: CATransition = CATransition()
+            transition.duration = 0.5
+            transition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+            transition.type = kCATransitionPush
+            transition.subtype = kCATransitionFromLeft
+            self.view.window!.layer.add(transition, forKey: nil)
+            self.dismiss(animated: false, completion: nil)
+            //            SwiftSpinner.show(duration:1, title:"Loading data...")
         }
         
     }
@@ -41,7 +62,7 @@ class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
             
             shareDialog.shareContent = content
             
-            shareDialog.delegate = nil
+            shareDialog.delegate = self as  FBSDKSharingDelegate
             shareDialog.fromViewController = self
             shareDialog.show()
             
@@ -101,6 +122,7 @@ class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
                 let typeList = [MyGlobal.type]
                 UserDefaults.standard.set(typeList, forKey: "favoriteType")
             }
+            self.view.showToast("Add to favorites!", position: .bottom, popTime: 1, dismissOnTap: false)
         }
         let removeFavoriteAction = UIAlertAction(title: "Remove from favorites", style: .default){ action in
             if var idList = idListObj as? Array<String>{
@@ -126,6 +148,7 @@ class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
                     i+=1
                 }
             }
+            self.view.showToast("Remove from favorites!", position: .bottom, popTime: 1, dismissOnTap: false)
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive){ action in
             print("Cancel")
@@ -174,7 +197,7 @@ class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
         let RFC3339DateFormatter = DateFormatter()
         RFC3339DateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         let date = RFC3339DateFormatter.date(from: json["posts"]["data"][indexPath.row]["created_time"].rawString()!)
-        RFC3339DateFormatter.dateFormat = "yyyy/MM/dd HH:mm:ss"
+        RFC3339DateFormatter.dateFormat = "dd MMM yyyy HH:mm:ss"
         let dateString = RFC3339DateFormatter.string(from: date!)
         cell.postDate.text = dateString;
         cell.postMes.numberOfLines = 0;
@@ -202,7 +225,7 @@ class PostsView: UIViewController,UITableViewDataSource, UITableViewDelegate {
             }
         }
         
-        let original = "http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/"+MyGlobal.id+"?fields=albums.limit(5){name,photos.limit(2){name,picture}},posts.limit(5){message,created_time}!access_token=EAAJvrTUjG3oBAPunL5N6OI0irmVe5ek5SeRyXVFdrA9l5wBIOpnxgEnrA2IprU6YshZC4d4EQ9XnpfLCXcHdPC3rk3kZC5qT0p0caZC0FdXsviOPRS0JzYDagSIkP7EOwCCGuZCrs6SHJNYOR1eYHNQkUze1iagZD"
+        let original = "http://sample-env-1.wtfjrqnkdf.us-west-2.elasticbeanstalk.com/php_script.php?url=https://graph.facebook.com/v2.8/"+MyGlobal.id+"?fields=albums.limit(5){name,photos.limit(2){name,picture}},posts.limit(5){message,created_time}!access_token=EAAJvrTUjG3oBAE7Jd9lGZCon7UuHjY96nICOamYwgVVzkKYQrsqLSffzfzSZCCmfWyrO1oHdz4SAL08s66EvZCZCqTIwYn5suMEQh9MatXewbkxb9p7tlnEurcA8snpHtNW1MbA9Kn1jd26elTQEK7f6sdS1RuwZD"
         if let encodedString = original.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed)
         {
             Alamofire.request(encodedString).responseJSON { response in
