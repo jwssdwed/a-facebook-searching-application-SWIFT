@@ -39,6 +39,7 @@
 		216C9CFE1E9EE8DE008A9665 /* users.png in Resources */ = {isa = PBXBuildFile; fileRef = 216C9CF11E9EE8DE008A9665 /* users.png */; };
 		216C9D001E9EE8FC008A9665 /* menu.png in Resources */ = {isa = PBXBuildFile; fileRef = 216C9CFF1E9EE8FC008A9665 /* menu.png */; };
 		216C9D021E9F389B008A9665 /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C9D011E9F389B008A9665 /* PageView.swift */; };
+		2186F0801EB42DA100A803CB /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2186F07F1EB42DA100A803CB /* Images.xcassets */; };
 		21A4C92C1EA569DF00834338 /* AboutMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A4C92B1EA569DF00834338 /* AboutMe.swift */; };
 		21A4C92E1EA57A4D00834338 /* UserFavorite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A4C92D1EA57A4D00834338 /* UserFavorite.swift */; };
 		21A4C9301EA5812900834338 /* PageFavorite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A4C92F1EA5812900834338 /* PageFavorite.swift */; };
@@ -94,6 +95,7 @@
 		216C9CF11E9EE8DE008A9665 /* users.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = users.png; sourceTree = "<group>"; };
 		216C9CFF1E9EE8FC008A9665 /* menu.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = menu.png; sourceTree = "<group>"; };
 		216C9D011E9F389B008A9665 /* PageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageView.swift; sourceTree = "<group>"; };
+		2186F07F1EB42DA100A803CB /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		21A4C92B1EA569DF00834338 /* AboutMe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutMe.swift; sourceTree = "<group>"; };
 		21A4C92D1EA57A4D00834338 /* UserFavorite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserFavorite.swift; sourceTree = "<group>"; };
 		21A4C92F1EA5812900834338 /* PageFavorite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageFavorite.swift; sourceTree = "<group>"; };
@@ -217,6 +219,7 @@
 				21D91BCD1EB1CF1700CBC762 /* Bolts.framework */,
 				21D91BCE1EB1CF1700CBC762 /* FBSDKCoreKit.framework */,
 				21D91BCF1EB1CF1700CBC762 /* FBSDKShareKit.framework */,
+				2186F07F1EB42DA100A803CB /* Images.xcassets */,
 			);
 			path = HW9;
 			sourceTree = "<group>";
@@ -317,6 +320,7 @@
 				21A4C93A1EA5B4F800834338 /* FacebookShare.podspec in Resources */,
 				216C9CFB1E9EE8DE008A9665 /* page.png in Resources */,
 				216C9CFA1E9EE8DE008A9665 /* options.png in Resources */,
+				2186F0801EB42DA100A803CB /* Images.xcassets in Resources */,
 				216C9CF21E9EE8DE008A9665 /* album.png in Resources */,
 				216C9CF61E9EE8DE008A9665 /* fb.png in Resources */,
 				21D91BD81EB1D15800CBC762 /* FacebookSDKStrings.bundle in Resources */,
@@ -523,7 +527,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D880C94C65EC582F6BF260ED /* Pods-HW9.debug.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = HW9/HW9.entitlements;
 				DEVELOPMENT_TEAM = 9RWNVPQH47;
@@ -546,7 +550,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7A7E8E464DB5EB0F8016FADC /* Pods-HW9.release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = HW9/HW9.entitlements;
 				DEVELOPMENT_TEAM = 9RWNVPQH47;
