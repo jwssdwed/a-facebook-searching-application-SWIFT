@@ -2,12 +2,14 @@
 
 ### Usage
 This Ios app allows users to search for Facebook accounts. By using a variety of keywords or types, this application presents a set of informations from target accounts.
+
 #### 1. homepage
 This is the homepage of this app, you can input any keyword you like.
 <center><img src="https://user-images.githubusercontent.com/6303340/27006841-aa9fb2a0-4df4-11e7-999e-b5baf3d1723a.jpg" width="40%">
 </center>
 The top-left hamburger button allows you slide this page left. In addition, the user-friendly design allows users to use fingure to slide out as well.
 <center><img src="https://user-images.githubusercontent.com/6303340/27006852-fd334770-4df4-11e7-8267-6746faf3e6bf.jpg" width="40%"></center>
+
 #### 2. Result page
 This is the searching result page. The different navigating button in the bottom presents results of different quering types.
 <center><img src="https://user-images.githubusercontent.com/6303340/27006880-875b8052-4df5-11e7-8e52-572a8af71cf8.jpg" width="40%"></center>
