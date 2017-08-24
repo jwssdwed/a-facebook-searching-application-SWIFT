@@ -30,7 +30,7 @@ In terms of the top-right button, if you click it, a pop-up dialog box shows fro
 <center><img src="https://user-images.githubusercontent.com/6303340/27006940-23653b36-4df7-11e7-8b50-a7dd80f640f5.jpg" width="40%"></center>
 
 #### 4. Favorite page
-The layout of favorite is same as result, but the data demonstrated here is only items you have favorited.
+The layout of favorite page is the same as search. However, only the favorited objects are presented here. This function can be realized by using Global Variable feature in Swift, like CoreData. Obviously, you can unfavorite any account in this page by click the filled star button or see the detail information of an account by select one of rows.
 
 <center><img src="https://user-images.githubusercontent.com/6303340/27006947-760afda8-4df7-11e7-9f1e-01005f9e51b0.jpg" width="40%"></center>
 
